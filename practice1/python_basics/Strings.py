@@ -1,8 +1,8 @@
 #Multiline strings
-a = """Lorem ipsum dolor sit amet,
-consectetur adipiscing elit,
-sed do eiusmod tempor incididunt
-ut labore et dolore magna aliqua."""
+a = """Hello! My name is blabla.
+I am studying mathematics and computer science.
+This summer I am learning Git and Python programming.
+It is a bit difficult, but I am trying my best!"""
 print(a)
 
 #Slicing
