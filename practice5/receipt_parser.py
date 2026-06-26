@@ -1,122 +1,67 @@
 import re
 import json
 
-
-# REGEX EXAMPLES
-
-text = "My number is 7771234567 and backup 7019876543"
-
-print("=== re.search() ===")
-match = re.search(r"\d+", text)
-if match:
-print(match.group())
-
-print("\n=== re.findall() ===")
-print(re.findall(r"\d+", text))
-
-print("\n=== re.split() ===")
-print(re.split(r"\s+", text))
-
-print("\n=== re.sub() ===")
-print(re.sub(r"\d", "*", text))
-
-print("\n=== re.match() ===")
-m = re.match(r"My", text)
-if m:
-print(m.group())
-
-
-
-# METACHARACTERS
-
-print("\n=== Metacharacters ===")
-print(re.findall(r".at", "cat bat rat"))
-print(re.findall(r"ca*t", "ct cat caat caaat"))
-print(re.findall(r"ca+t", "ct cat caat caaat"))
-print(re.findall(r"ca?t", "ct cat caat"))
-print(re.findall(r"[cr]at", "cat rat bat"))
-print(re.findall(r"cat|rat", "cat rat bat"))
-
-
-
-
-# SPECIAL SEQUENCES
-
-
-sample = "Room 101 costs 50000 tenge"
-
-print("\n=== Special Sequences ===")
-print("Digits:", re.findall(r"\d+", sample))
-print("Non-digits:", re.findall(r"\D+", sample))
-print("Words:", re.findall(r"\w+", sample))
-print("Non-words:", re.findall(r"\W+", sample))
-print("Spaces:", re.findall(r"\s", sample))
-print("Non-spaces:", re.findall(r"\S+", sample))
-
-
-
-# QUANTIFIERS
-
-
-print("\n=== Quantifiers ===")
-print(re.findall(r"a{3}", "aaa aaaa aaaaa"))
-print(re.findall(r"a{3,}", "aaa aaaa aaaaa"))
-print(re.findall(r"a{3,5}", "aaa aaaa aaaaa"))
-
-
-
-# RECEIPT PARSER
-
-
-print("\n=== Receipt Parser ===")
-
-try:
+# Read receipt from file
 with open("raw.txt", "r", encoding="utf-8") as file:
-receipt = file.read()
+    text = file.read()
 
+# Extract product names
+products = re.findall(r"\d+\.\s*\n(.+?)\n\d+,\d{3}\s*x", text, re.DOTALL)
+products = [product.replace("\n", " ").strip() for product in products]
 
+# Extract prices
+price_strings = re.findall(r"\n(\d[\d ]*,\d{2})\nСтоимость", text)
+prices = [float(price.replace(" ", "").replace(",", ".")) for price in price_strings]
 
-# Prices
-prices = re.findall(r"\d+\.\d{2}", receipt)
+# Calculate total amount
+calculated_total = sum(prices)
 
-# Date
-date_match = re.search(r"\d{2}[/-]\d{2}[/-]\d{4}", receipt)
-date = date_match.group() if date_match else None
-
-# Time
-time_match = re.search(r"\d{2}:\d{2}(?::\d{2})?", receipt)
-time = time_match.group() if time_match else None
-
-# Payment Method
-payment_match = re.search(
-    r"(VISA|MASTERCARD|CARD|CASH|AMEX)",
-    receipt,
-    re.IGNORECASE
+# Extract total from receipt
+total_match = re.search(r"ИТОГО:\s*\n([\d ]*,\d{2})", text)
+receipt_total = (
+    float(total_match.group(1).replace(" ", "").replace(",", "."))
+    if total_match
+    else 0
 )
-payment_method = payment_match.group() if payment_match else None
 
-# Products
-product_pattern = r"([A-Za-zА-Яа-я\s]+)\s+(\d+\.\d{2})"
-products = []
+# Extract date and time
+datetime_match = re.search(
+    r"Время:\s*(\d{2}\.\d{2}\.\d{4})\s+(\d{2}:\d{2}:\d{2})",
+    text
+)
 
-for item in re.findall(product_pattern, receipt):
-    products.append({
-        "name": item[0].strip(),
-        "price": float(item[1])
-    })
+date = datetime_match.group(1) if datetime_match else "Not found"
+time = datetime_match.group(2) if datetime_match else "Not found"
 
-total = sum(float(price) for price in prices)
+# Extract payment method
+payment_match = re.search(r"(Банковская карта|Наличные)", text)
+payment_method = payment_match.group(1) if payment_match else "Not found"
 
-result = {
+# Store all information
+receipt = {
+    "products": products,
+    "prices": prices,
+    "calculated_total": calculated_total,
+    "receipt_total": receipt_total,
     "date": date,
     "time": time,
-    "payment_method": payment_method,
-    "products": products,
-    "total": total
+    "payment_method": payment_method
 }
 
-print(json.dumps(result, indent=4, ensure_ascii=False))
+# Print formatted output
+print("========== RECEIPT ==========")
+print(f"Date: {date}")
+print(f"Time: {time}")
+print(f"Payment Method: {payment_method}")
+print()
 
+print("Products:")
+for product, price in zip(products, prices):
+    print(f"- {product} : {price:.2f} KZT")
 
-except FileNotFoundError:
-print("raw.txt not found.")
+print()
+print(f"Calculated Total: {calculated_total:.2f} KZT")
+print(f"Receipt Total: {receipt_total:.2f} KZT")
+
+print("\nJSON Output:")
+print(json.dumps(receipt, indent=4, ensure_ascii=False))
