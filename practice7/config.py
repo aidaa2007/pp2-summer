@@ -5,14 +5,12 @@ def load_config(filename="database.ini", section="postgresql"):
     parser = ConfigParser()
     parser.read(filename)
 
-    db = {}
+    config = {}
 
     if parser.has_section(section):
-        params = parser.items(section)
-
-        for param in params:
-            db[param[0]] = param[1]
+        for k, v in parser.items(section):
+            config[k] = v
     else:
-        raise Exception(f"Section {section} not found.")
+        raise Exception("Section postgresql not found")
 
-    return db
+    return config
