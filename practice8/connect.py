@@ -2,7 +2,7 @@ import psycopg2
 
 DB_NAME = "phonebook"
 DB_USER = "postgres"
-DB_PASSWORD = "your_password"
+DB_PASSWORD = "Asd05052007@"
 DB_HOST = "localhost"
 DB_PORT = "5432"
 
