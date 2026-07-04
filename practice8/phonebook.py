@@ -3,33 +3,48 @@ from connect import get_connection
 conn = get_connection()
 cur = conn.cursor()
 
-# UPSERT
-cur.execute(
-    "CALL upsert_contact(%s, %s, %s)",
-    ("Ali", "Aman", "77001234567")
-)
-conn.commit()   # 👈 ДОБАВИТЬ
+try:
+    # ======================
+    # UPSERT
+    # ======================
+    cur.execute(
+        "CALL upsert_contact(%s, %s, %s)",
+        ("Ali", "Aman", "77001234567")
+    )
+    conn.commit()
 
-# SEARCH FUNCTION
-cur.execute(
-    "SELECT * FROM search_pattern(%s)",
-    ("Ali",)
-)
-print("SEARCH:", cur.fetchall())
+    # ======================
+    # SEARCH FUNCTION
+    # ======================
+    cur.execute(
+        "SELECT * FROM search_pattern(%s::text)",
+        ("Ali",)
+    )
+    print("SEARCH RESULT:")
+    print(cur.fetchall())
 
-# PAGINATION
-cur.execute(
-    "SELECT * FROM get_contacts_paginated(%s, %s)",
-    (5, 0)
-)
-print("PAGE:", cur.fetchall())
+    # ======================
+    # PAGINATION FUNCTION
+    # ======================
+    cur.execute(
+        "SELECT * FROM get_contacts_paginated(%s, %s)",
+        (5, 0)
+    )
+    print("PAGINATION RESULT:")
+    print(cur.fetchall())
 
-# DELETE
-cur.execute(
-    "CALL delete_contact(%s)",
-    ("Ali",)
-)
-conn.commit()   # 👈 ДОБАВИТЬ
+    # ======================
+    # DELETE PROCEDURE
+    # ======================
+    cur.execute(
+        "CALL delete_contact(%s)",
+        ("Ali",)
+    )
+    conn.commit()
 
-cur.close()
-conn.close()
+except Exception as e:
+    print("ERROR:", e)
+
+finally:
+    cur.close()
+    conn.close()
