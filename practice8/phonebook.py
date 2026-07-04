@@ -8,6 +8,7 @@ cur.execute(
     "CALL upsert_contact(%s, %s, %s)",
     ("Ali", "Aman", "77001234567")
 )
+conn.commit()   # 👈 ДОБАВИТЬ
 
 # SEARCH FUNCTION
 cur.execute(
@@ -28,7 +29,7 @@ cur.execute(
     "CALL delete_contact(%s)",
     ("Ali",)
 )
+conn.commit()   # 👈 ДОБАВИТЬ
 
-conn.commit()
 cur.close()
 conn.close()
